@@ -1,0 +1,29 @@
+{
+  "name": "mincer-ruby-sass",
+  "version": "0.0.1",
+  "description": "Ruby Sass engine for Mincer",
+  "main": "index.js",
+  "dependencies": {
+    "mincer": "~0.5.6",
+    "execSync": "~1.0.1-pre"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/percyhanna/mincer-ruby-sass.git"
+  },
+  "keywords": [
+    "mincer",
+    "mincer-contrib",
+    "assets",
+    "pipeline",
+    "sass",
+    "scss",
+    "compile"
+  ],
+  "author": "Andrew Hanna",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/percyhanna/mincer-ruby-sass/issues"
+  },
+  "homepage": "https://github.com/percyhanna/mincer-ruby-sass"
+}
