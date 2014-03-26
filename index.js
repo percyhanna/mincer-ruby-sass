@@ -32,7 +32,7 @@ require('util').inherits(RubySassEngine, Template);
 
 // Render data
 RubySassEngine.prototype.evaluate = function (context/*, locals*/) {
-  var css = sh.exec('sass --scss ' + this.file);
+  var css = sh.exec('sass -q --scss ' + this.file);
   return css.stdout;
 };
 
