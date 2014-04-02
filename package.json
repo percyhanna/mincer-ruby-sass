@@ -5,7 +5,8 @@
   "main": "index.js",
   "dependencies": {
     "mincer": "~0.5.6",
-    "execSync": "~1.0.1-pre"
+    "execSync": "~1.0.1-pre",
+    "shell-escape": "~0.1.0"
   },
   "scripts": {
     "test": "node test/test_scss.js"

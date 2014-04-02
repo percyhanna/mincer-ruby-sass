@@ -15,10 +15,11 @@
 
 'use strict';
 
-var Mincer    = require('mincer');
-var Template  = Mincer.Template;
-var prop      = require('mincer/lib/mincer/common').prop;
-
+var Mincer      = require('mincer');
+var Template    = Mincer.Template;
+var prop        = require('mincer/lib/mincer/common').prop;
+var path        = require('path');
+var shellescape = require('shell-escape');
 var sh = require('execSync');
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -31,9 +32,16 @@ var RubySassEngine = module.exports = function RubySassEngine() {
 require('util').inherits(RubySassEngine, Template);
 
 // Render data
-RubySassEngine.prototype.evaluate = function (context/*, locals*/) {
-  var css = sh.exec('sass -q --scss ' + this.file);
-  return css.stdout;
+RubySassEngine.prototype.evaluate = function (context, locals) {
+  var data = this.data.replace(/[\$\(\)\[\]\\"]/g, '\\$&'),
+      dir = path.dirname(this.file),
+      css = sh.exec('echo "' + data + '" | sass -s -q --scss -I ' + shellescape([dir]));
+
+  if (css.code) {
+    throw new Error(css.stdout);
+  } else {
+    return css.stdout;
+  }
 };
 
 
