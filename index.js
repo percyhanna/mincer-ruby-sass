@@ -19,7 +19,6 @@ var Mincer      = require('mincer');
 var Template    = Mincer.Template;
 var prop        = require('mincer/lib/mincer/common').prop;
 var path        = require('path');
-var shellescape = require('shell-escape');
 var sh = require('execSync');
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -29,13 +28,18 @@ var RubySassEngine = module.exports = function RubySassEngine() {
   Template.apply(this, arguments);
 };
 
+function shellEscape (text) {
+  var shellescape = /[\$\\"]/g;
+  return '"' + text.replace(shellescape, '\\$&') + '"';
+}
+
 require('util').inherits(RubySassEngine, Template);
 
 // Render data
 RubySassEngine.prototype.evaluate = function (context, locals) {
-  var data = this.data.replace(/[\$\(\)\[\]\\"]/g, '\\$&'),
+  var data = shellEscape(this.data),
       dir = path.dirname(this.file),
-      css = sh.exec('echo "' + data + '" | sass -s -q --scss -I ' + shellescape([dir]));
+      css = sh.exec('echo ' + data + ' | sass -s -q --scss -I ' + shellEscape(dir));
 
   if (css.code) {
     throw new Error(css.stdout);
