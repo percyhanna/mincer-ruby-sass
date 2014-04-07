@@ -45,10 +45,11 @@ RubySassEngine.prototype.evaluate = function (context, locals) {
   var data = shellEscape(this.data),
       dir = path.dirname(this.file),
       dirs = includeDirs.concat(dir).map(shellEscape),
-      css = sh.exec('echo ' + data + ' | sass -s -q --scss -I ' + dirs.join(' -I '));
+      cmd = 'echo ' + data + ' | sass -s -q --scss -I ' + dirs.join(' -I '),
+      css = sh.exec(cmd);
 
   if (css.code) {
-    throw new Error(css.stdout);
+    throw new Error('Error compiling Sass: ' + cmd + "\n" + css.stdout);
   } else {
     return css.stdout;
   }
