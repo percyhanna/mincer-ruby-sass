@@ -19,7 +19,9 @@ var Mincer      = require('mincer');
 var Template    = Mincer.Template;
 var prop        = require('mincer/lib/mincer/common').prop;
 var path        = require('path');
-var sh = require('execSync');
+var fs          = require('fs');
+var sh          = require('execSync');
+var includeDirs = [];
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -35,19 +37,24 @@ function shellEscape (text) {
 
 require('util').inherits(RubySassEngine, Template);
 
+RubySassEngine.addIncludeDir = function (dir) {
+  includeDirs.push(dir);
+};
+
 // Render data
 RubySassEngine.prototype.evaluate = function (context, locals) {
   var data = shellEscape(this.data),
-      dir = path.dirname(this.file),
-      css = sh.exec('echo ' + data + ' | sass -s -q --scss -I ' + shellEscape(dir));
+      dir = path.dirname(fs.realpathSync(this.file)),
+      dirs = includeDirs.concat(dir).map(shellEscape),
+      cmd = 'echo ' + data + ' | sass -s -q --scss -I ' + dirs.join(' -I '),
+      css = sh.exec(cmd);
 
   if (css.code) {
-    throw new Error(css.stdout);
+    throw new Error('Error compiling Sass: ' + cmd + "\n" + css.stdout);
   } else {
     return css.stdout;
   }
 };
-
 
 // Expose default MimeType of an engine
 prop(RubySassEngine, 'defaultMimeType', 'text/css');
