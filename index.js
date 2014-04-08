@@ -19,6 +19,7 @@ var Mincer      = require('mincer');
 var Template    = Mincer.Template;
 var prop        = require('mincer/lib/mincer/common').prop;
 var path        = require('path');
+var fs          = require('fs');
 var sh          = require('execSync');
 var includeDirs = [];
 
@@ -43,7 +44,7 @@ RubySassEngine.addIncludeDir = function (dir) {
 // Render data
 RubySassEngine.prototype.evaluate = function (context, locals) {
   var data = shellEscape(this.data),
-      dir = path.dirname(this.file),
+      dir = path.dirname(fs.realpathSync(this.file)),
       dirs = includeDirs.concat(dir).map(shellEscape),
       cmd = 'echo ' + data + ' | sass -s -q --scss -I ' + dirs.join(' -I '),
       css = sh.exec(cmd);
