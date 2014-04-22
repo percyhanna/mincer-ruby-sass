@@ -1,6 +1,6 @@
 {
   "name": "mincer-ruby-sass",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Ruby Sass engine for Mincer",
   "main": "index.js",
   "dependencies": {
