@@ -31,7 +31,7 @@ var RubySassEngine = module.exports = function RubySassEngine() {
 };
 
 function shellEscape (text) {
-  var shellescape = /[\$\\"]/g;
+  var shellescape = /[\$\\"`]/g;
   return '"' + text.replace(shellescape, '\\$&') + '"';
 }
 
@@ -52,7 +52,7 @@ RubySassEngine.prototype.evaluate = function (context, locals) {
   if (css.code) {
     throw new Error('Error compiling Sass: ' + cmd + "\n" + css.stdout);
   } else {
-    return css.stdout;
+    return this.data = css.stdout;
   }
 };
 
