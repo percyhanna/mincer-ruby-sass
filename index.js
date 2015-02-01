@@ -44,8 +44,8 @@ RubySassEngine.addIncludeDir = function (dir) {
 
 // Render data
 RubySassEngine.prototype.evaluate = function (context, locals) {
-  var scssInputPath = fs.realpathSync(this.file),
-      dirs = includeDirs.concat(path.dirname(scssInputPath)).map(shellEscape),
+  var scssInputPath = temp.path({ suffix: '.scss' }),
+      dirs = includeDirs.concat(path.dirname(this.file)).map(shellEscape),
       cmdPath = path.resolve(__dirname, 'bin/sass'),
       dependencyPath = temp.path({ suffix: '.json' }),
       cssOutputPath = temp.path({ suffix: '.css' }),
@@ -59,6 +59,8 @@ RubySassEngine.prototype.evaluate = function (context, locals) {
         scssInputPath,
         cssOutputPath
       ];
+
+  fs.writeFileSync(scssInputPath, this.data);
 
   var exec = sh.exec(cmd.join(' '));
 
