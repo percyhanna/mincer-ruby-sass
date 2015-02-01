@@ -4,7 +4,7 @@ mincer-ruby-sass
 Mincer Sass/Scss engine that uses official Ruby Sass engine
 
 NOTES
-=====
+-----
 
 * This package assumes you have the Ruby Sass gem installed. Although we do not
 use the gem's provided binary file, we do `require 'sass'`.
