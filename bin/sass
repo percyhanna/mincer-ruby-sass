@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+# The command line Sass parser.
+
+require 'json'
+
+OPTION_NAME = '--dependencies-out'
+
+THIS_FILE = File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__
+begin
+  require File.dirname(THIS_FILE) + '/../lib/sass'
+rescue LoadError
+  require 'sass'
+end
+require 'sass/exec'
+
+# need to spy on engines
+$engines = []
+class Sass::Engine
+  alias :old_initialize :initialize
+
+  def initialize(*args)
+    $engines << self
+    old_initialize(*args)
+  end
+end
+
+dependency_path = nil
+if index = ARGV.index(OPTION_NAME)
+  ARGV.delete_at(index)
+  dependency_path = ARGV.delete_at(index)
+end
+
+opts = Sass::Exec::Sass.new(ARGV)
+begin
+  opts.parse!
+rescue SystemExit
+  # Sass throws a SystemExit... let's not exit quite yet
+end
+
+if dependency_path
+  dependent_engines = $engines.map { |engine| engine.dependencies.to_a }.flatten.uniq
+  dependent_files = dependent_engines.map { |engine| engine.options[:filename] }.compact
+
+  File.write(dependency_path, dependent_files.to_json)
+end

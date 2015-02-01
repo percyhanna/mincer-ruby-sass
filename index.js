@@ -21,6 +21,7 @@ var prop        = require('mincer/lib/mincer/common').prop;
 var path        = require('path');
 var fs          = require('fs');
 var sh          = require('execSync');
+var temp        = require('temp');
 var includeDirs = [];
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -43,16 +44,41 @@ RubySassEngine.addIncludeDir = function (dir) {
 
 // Render data
 RubySassEngine.prototype.evaluate = function (context, locals) {
-  var data = shellEscape(this.data),
-      dir = path.dirname(fs.realpathSync(this.file)),
-      dirs = includeDirs.concat(dir).map(shellEscape),
-      cmd = 'echo ' + data + ' | sass -s -q --scss -I ' + dirs.join(' -I '),
-      css = sh.exec(cmd);
+  var scssInputPath = fs.realpathSync(this.file),
+      dirs = includeDirs.concat(path.dirname(scssInputPath)).map(shellEscape),
+      cmdPath = path.resolve(__dirname, 'bin/sass'),
+      dependencyPath = temp.path({ suffix: '.json' }),
+      cssOutputPath = temp.path({ suffix: '.css' }),
+      cmd = [
+        cmdPath,
+        '-q',
+        '--scss',
+        '--dependencies-out',
+        JSON.stringify(dependencyPath),
+        '-I ' + dirs.join(' -I '),
+        scssInputPath,
+        cssOutputPath
+      ];
 
-  if (css.code) {
-    throw new Error('Error compiling Sass: ' + cmd + "\n" + css.stdout);
+  var exec = sh.exec(cmd.join(' '));
+
+  if (!fs.existsSync(dependencyPath)) {
+    throw new Error('Could not load dependent files from Sass: file does not exist.\n' + exec.stdout);
+  }
+
+  var dependentFileContent = fs.readFileSync(dependencyPath, { encoding: 'utf8' });
+
+  if (dependentFileContent) {
+    var dependentFiles = JSON.parse(dependentFileContent);
+    dependentFiles.forEach(function (file) {
+      context.dependOn(path.resolve(file));
+    });
+  }
+
+  if (exec.code) {
+    throw new Error('Error compiling Sass: ' + exec + "\n" + exec.stdout);
   } else {
-    return this.data = css.stdout;
+    return this.data = fs.readFileSync(cssOutputPath, { encoding: 'utf8' });
   }
 };
 
