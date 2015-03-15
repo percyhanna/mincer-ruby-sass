@@ -37,6 +37,6 @@ sassEngine.setShowRawOutput(function (path) {
 ```
 
 This will show the raw output for any path that does not match the defined regex,
-in this case, the `app.(s)css` and `mobile.(s).css` paths. So, any `@import`ed
+in this case, the `app.(s)css` and `mobile.(s)css` paths. So, any `@import`ed
 assets will show their raw contents, while the two files above will show the
 compiled contents.
