@@ -30,7 +30,15 @@ if index = ARGV.index(OPTION_NAME)
   dependency_path = ARGV.delete_at(index)
 end
 
-opts = Sass::Exec::Sass.new(ARGV)
+case Sass::VERSION
+when /^3\.4/
+  opts = Sass::Exec::SassScss.new(ARGV, :sass)
+when /^3\./
+  opts = Sass::Exec::Sass.new(ARGV)
+else
+  raise "mincer-ruby-sass requires Sass 3.1+"
+end
+
 begin
   opts.parse!
 rescue SystemExit
