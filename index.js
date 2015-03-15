@@ -107,8 +107,8 @@ RubySassEngine.prototype.evaluate = function (context, locals) {
     }
   }
 
-  if (exec.status) {
-    throw new Error('Error compiling Sass: ' + exec + "\n" + exec.stdout);
+  if (exec.status || !fs.existsSync(cssOutputPath)) {
+    throw new Error('Error compiling Sass: ' + exec.stderr + "\n" + exec.stdout);
   } else {
     return this.data = fs.readFileSync(cssOutputPath, { encoding: 'utf8' });
   }
