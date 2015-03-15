@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/percyhanna/mincer-ruby-sass.svg?branch=master)](https://travis-ci.org/percyhanna/mincer-ruby-sass)
+
 mincer-ruby-sass
 ================
 
