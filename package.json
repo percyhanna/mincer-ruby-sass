@@ -4,8 +4,8 @@
   "description": "Ruby Sass engine for Mincer",
   "main": "index.js",
   "dependencies": {
-    "execSync": "~1.0.1-pre",
     "mincer": "~1.0.0",
+    "sync-exec": "^0.5.0",
     "temp": "^0.8.1"
   },
   "scripts": {
