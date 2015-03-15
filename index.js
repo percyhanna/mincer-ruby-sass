@@ -24,6 +24,10 @@ var execSync    = require('sync-exec');
 var temp        = require('temp');
 var includeDirs = [];
 
+var showRawOutput = function (path) {
+  return false;
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // Class constructor
@@ -42,17 +46,30 @@ RubySassEngine.addIncludeDir = function (dir) {
   includeDirs.push(dir);
 };
 
+RubySassEngine.setShowRawOutput = function (fn) {
+  if (typeof fn === 'function') {
+    showRawOutput = fn;
+  }
+};
+
 // Render data
 RubySassEngine.prototype.evaluate = function (context, locals) {
+  if (showRawOutput(this.file)) {
+    return this.data;
+  }
+
   var scssInputPath = temp.path({ suffix: '.scss' }),
       dirs = includeDirs.concat(path.dirname(this.file)).map(shellEscape),
       dependencyPath = temp.path({ suffix: '.json' }),
       cssOutputPath = temp.path({ suffix: '.css' }),
+      cssSourcemapOutputPath = cssOutputPath + '.map',
+      withSourcemap = context.environment.isEnabled('source_maps'),
       cmd = [
         './sass',
         '-q',
+        withSourcemap ? '--sourcemap' : '',
         '--dependencies-out',
-        JSON.stringify(dependencyPath),
+        dependencyPath,
         '-I ' + dirs.join(' -I '),
         scssInputPath,
         cssOutputPath
@@ -73,6 +90,21 @@ RubySassEngine.prototype.evaluate = function (context, locals) {
     dependentFiles.forEach(function (file) {
       context.dependOn(path.resolve(file));
     });
+  }
+
+  if (withSourcemap && cssSourcemapOutputPath && fs.existsSync(cssSourcemapOutputPath)) {
+    var sourcemap = fs.readFileSync(cssSourcemapOutputPath, { encoding: 'utf8' });
+
+    if (sourcemap) {
+      var map = JSON.parse(sourcemap);
+      var dir = path.dirname(context.pathname);
+      map.sources.forEach(function (file, idx) {
+        var rel = path.relative(dir, file);
+        if (path.sep === '\\') { rel = rel.replace('\\', '/'); }
+        map.sources[idx] = rel;
+      });
+      this.map = JSON.stringify(map);
+    }
   }
 
   if (exec.status) {
