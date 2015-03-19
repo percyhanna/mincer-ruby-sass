@@ -79,6 +79,10 @@ RubySassEngine.prototype.evaluate = function (context, locals) {
 
   var exec = execSync(cmd.join(' '), { cwd: __dirname + '/bin' });
 
+  if (exec.status || !fs.existsSync(cssOutputPath)) {
+    throw new Error('Error compiling Sass: ' + exec.stderr + "\n" + exec.stdout);
+  }
+
   if (!fs.existsSync(dependencyPath)) {
     throw new Error('Could not load dependent files from Sass: file does not exist.\n' + exec.stdout);
   }
@@ -107,11 +111,7 @@ RubySassEngine.prototype.evaluate = function (context, locals) {
     }
   }
 
-  if (exec.status || !fs.existsSync(cssOutputPath)) {
-    throw new Error('Error compiling Sass: ' + exec.stderr + "\n" + exec.stdout);
-  } else {
-    return this.data = fs.readFileSync(cssOutputPath, { encoding: 'utf8' });
-  }
+  return this.data = fs.readFileSync(cssOutputPath, { encoding: 'utf8' });
 };
 
 // Expose default MimeType of an engine
